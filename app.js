@@ -3,19 +3,19 @@ const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const session = require("express-session")
-const MongoDBStore = require("connect-mongodb-session")(session)
+const session = require('express-session');
+const MongoDBStore = require('connect-mongodb-session')(session);
 
 const errorController = require('./controllers/error');
 const User = require('./models/user');
 
-const MONGODB_URI = "mongodb://localhost:27017/lab"
+const MONGODB_URI = "mongodb://localhost:27017/lab";
 
 const app = express();
 const store = new MongoDBStore({
   uri: MONGODB_URI,
-  collection: 'session'
-})
+  collection: 'sessions'
+});
 
 app.set('view engine', 'ejs');
 app.set('views', 'views');
@@ -26,32 +26,32 @@ const authRoutes = require('./routes/auth');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(session({
-  secret: 'my secret',
-  resave: false,
-  saveUninitialized: false,
-  store: store
-}))
+app.use(
+  session({
+    secret: 'my secret',
+    resave: false,
+    saveUninitialized: false,
+    store: store
+  })
+);
 
 app.use((req, res, next) => {
-  if(!req.session.user) {
-    return next()
+  if (!req.session.user) {
+    return next();
   }
   User.findById(req.session.user._id)
-  .then(user => {
-    req.user = user
-    next()
-  })
-  .catch(err => console.log(err)) 
-})
+    .then(user => {
+      req.user = user;
+      next();
+    })
+    .catch(err => console.log(err));
+});
 
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
-app.use(authRoutes)
+app.use(authRoutes);
 
 app.use(errorController.get404);
-
-
 
 mongoose
   .connect(MONGODB_URI)
@@ -76,5 +76,3 @@ mongoose
     console.log("Da ket noi voi MongOOSE Lab !!!")
   })
   .catch(err => console.log("Ket noi vs Mongoose That bai"))
-    
-   
