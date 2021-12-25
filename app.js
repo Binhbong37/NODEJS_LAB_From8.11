@@ -20,14 +20,30 @@ const store = new MongoDBStore({
   collection: 'sessions'
 });
 const csrfProtection = csrf();
+
 const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'images')
   },
   filename: (req, file, cb) => {
-    cb(null, new Date().toISOString() + '-' + file.originalname)
+    cb(null, new Date().toISOString + '-' + file.originalname)
   }
 })
+
+const fileFilter = (req, file, cb) => {
+  console.log('KET QUA LOG FILE: ', file)
+  if( 
+    file.mimetype === 'image/png' ||
+    file.mimetype === 'image/jpg' ||
+    file.mimetype === 'image/jpeg'
+    ) {
+    console.log("File ok !!!")
+    cb(null, true)
+  } else {
+    console.log("SAI FILE")
+    cb(null, false)
+  }
+}
 
 app.set('view engine', 'ejs');
 app.set('views', 'views');
@@ -37,7 +53,7 @@ const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
 
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(multer({ storage: fileStorage }).single('image'))
+app.use(multer({ storage: fileStorage, fileFilter: fileFilter }).single('image'))
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(
   session({
@@ -83,6 +99,7 @@ app.get('/500', errorController.get500);
 app.use(errorController.get404);
 
 app.use((error, req, res, next) => {
+  console.log('LOG SESSION: ',req.session.isLoggedIn)
   // res.status(error.httpStatusCode).render(...);
   // res.redirect('/500');
   res.status(500).render('500', {
