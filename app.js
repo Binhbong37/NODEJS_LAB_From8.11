@@ -55,22 +55,6 @@ app.use(errorController.get404);
 
 mongoose
   .connect(MONGODB_URI)
-  .then(result => {
-    User.findOne()
-    .then(user => {
-      if(!user) {
-        const user = new User({
-          name: 'Max',
-          email: 'abc@gmail.com',
-          cart: {
-            items: []
-          }
-        })
-        user.save()
-      }
-    }) 
-    .catch(err => console.log('K co nguoi dung dc tao'))
-  })
   .then(() => {
     app.listen(3000)
     console.log("Da ket noi voi MongOOSE Lab !!!")

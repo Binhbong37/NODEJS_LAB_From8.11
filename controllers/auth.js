@@ -29,7 +29,30 @@ exports.postLogin = (req, res, next) => {
     .catch(err => console.log(err));
 };
 
-exports.postSignup = (req, res, next) => {};
+exports.postSignup = (req, res, next) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  // const confirmPass = req.boyd.confirmPassword
+  
+  User.findOne({ email: email })
+  .then(userDoc => {
+    if(userDoc) {
+      return res.redirect("/signup")
+    }
+    const newUser = new User({
+      email: email,
+      password: password,
+      cart: { items: [] }
+    })
+    return newUser.save()
+  })
+  .then(result => {
+    console.log("Tao User thanh cong !!")
+    res.redirect('/login')
+  })
+  .catch(err => console.log('Chua tao dc USER moi !!'))
+
+};
 
 exports.postLogout = (req, res, next) => {
   req.session.destroy(err => {
